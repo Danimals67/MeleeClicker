@@ -1,4 +1,5 @@
 <!--TODO
+https://analytics.google.com/analytics/web/?authuser=0#management/Settings/a80956706w120260793p125844031/%3Fm.page%3DTrackingCode%26_r.ghFlowId%3D6324039/
 http://repo.xposed.info/module/com.brandonnalls.mockmocklocations
  
 -add stages; stages that favor certain characters; gives that character a boost
@@ -9,14 +10,25 @@ http://repo.xposed.info/module/com.brandonnalls.mockmocklocations
 	--specifics - everything passed game and watch produces too much C/s DONE
 			    - double click power gets too expensive too quickly
 				- increase price after every character don't do a consistent increase
+-add google analyitics
 -->
 
 <html>
 <head>
-<script src="../Jquery/jquery-3.0.0.min.js"></script>
+<script src="Jquery/jquery-3.0.0.min.js"></script>
 <link rel="stylesheet" tpye = "text/css" href="ICCSS.css">
 <script src="Melee.js"></script>
 <title>Melee Clicker</title>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-80956706-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
 </head>
 
 <body onLoad = "start()">
