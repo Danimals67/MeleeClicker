@@ -1,0 +1,291 @@
+<!--TODO
+http://repo.xposed.info/module/com.brandonnalls.mockmocklocations
+ 
+-add stages; stages that favor certain characters; gives that character a boost
+-add upgrades; l-cancels, fast falls, jc grab, etc.
+-fix delay when characters are bought DONE
+-fix the timer being so slow DONE
+-balancing
+	--specifics - everything passed game and watch produces too much C/s DONE
+			    - double click power gets too expensive too quickly
+				- increase price after every character don't do a consistent increase
+-->
+
+<html>
+<head>
+<script src="../Jquery/jquery-3.0.0.min.js"></script>
+<link rel="stylesheet" tpye = "text/css" href="ICCSS.css">
+<script src="Melee.js"></script>
+<title>Melee Clicker</title>
+</head>
+
+<body onLoad = "start()">
+
+	<div id = "header">
+	<h1>Melee Clicker</h1>
+	<!--<button type = "button" onClick = "test()">test</button>-->
+	<div id = "Layers">
+		<img src = "Images/Misc/shine.png" class = "img"></img>
+		<canvas id = "coinCanvas" width = "251" height = "266" <!--onclick = "basicClick()"-->></canvas>
+	</div>
+	<div id = "stats">
+		<p id = "total">Coins: </p>
+		<p id = "perSec">Coins/s: </p>
+		<p id = "perClick">Per Click: </p>
+	</div>
+	<div id = "upgradesPanel">
+		<p style = "text-align: center;" id = "uText">Upgrades</p>
+		<div style = "text-align: center">
+		<button id = "show" onclick = "show()">Show</button>
+		</div>
+		<div id = "upgrades">
+			<p id = "2xClick">Upgrade Shine - <span id = "2xClickPrice"></span> coins<br><span style = "font-size: 12px;">(x2 click power)</span></p>
+			<p id = "2xKirby">Upgrade Kirby - <span id = "2xKirbyPrice"></span> coins<br><span style = "font-size: 12px;">(x2 kirby power)</span></p>
+		</div>
+	</div>
+	
+	<div id = "stagesPanel">
+		<p style = "text-align: center;" id = "uText">Stages</p>
+		<div style = "text-align: center;">
+			<button id = "stagesShow" onclick = "stagesShow()">Show</button>
+		</div>
+		<div id = "container"style = "height: 500px; width: 200px; margin-top: 30px; overflow: auto;">
+		<!--Figure out how to order these-->
+		<div id = "stages">
+			<div id = "corneria"><p>Corneria<br>Cost: <span class = "stageCost"></span><img src = "Images/Stages/Corneria.png" class = "stage"></img></p></div>
+			<div id = "pokeFloats"><p>Poké Floats<br>Cost: <span class = "stageCost"></span><img src = "Images/Stages/PokeFloats.png" class = "stage"></img></p></div>
+			<div id = "rainbowCruise"><p>Rainbow Cruise<br>Cost: <span class = "stageCost"></span><img src = "Images/Stages/RainbowCruise.png" class = "stage"></img></p></div>
+			<div id = "FoD"><p>Fountain of Dreams<br>Cost: <span class = "stageCost"></span><img src = "Images/Stages/FoD.png" class = "stage"></img></p></div>
+			<div id = "dreamland"><p>Dreamland<br>Cost: <span class = "stageCost"></span><img src = "Images/Stages/Dreamland.png" class = "stage"></img></p></div>
+			<div id = "FD"><p>Final Destination<br>Cost: <span class = "stageCost"></span><img src = "Images/Stages/FD.png" class = "stage"></img></p></div>
+			<div id = "battlefield"><p>Battlefield<br>Cost: <span class = "stageCost"></span><img src = "Images/Stages/Battlefield.png" class = "stage"></img></p></div>
+			<div id = "pokemonStadium"><p>Pokemon Stadium<br>Cost: <span class = "stageCost"></span><img src = "Images/Stages/Stadium.png" class = "stage"></img></p></div>
+			<div id = "yoshisStory"><p>Yoshi's Story<br>Cost: <span class = "stageCost"></span><img src = "Images/Stages/YoshisStory.png" class = "stage"></img></p></div>
+		</div>
+		</div>
+	</div>
+	
+	<div id = "fLayer">
+	<div id = "fLock">
+	<h3 id = "fTitle">F tiers</h3>
+	<button id = "f" onclick = "unlock = this.id, Unlock()">Unlock<br><span id = "fUnlockCost">(11 coins)</span></button>
+	<ul id = "cList">
+		<li><!--Kirby:--><img src = "Images/Characters/kirby.png" id = "kirby" class = "fPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "fList">cost: <span id = "kirbyCost" class = "fList kirbyCost"/></li>
+				<li class = "fList">C/s: <span id = "kirbyProduce" class = "fList"/></li>
+				<li class = "fList">Owned: <span id = "kirbyOwned" class = "fList"/></li>
+			</ul>
+		</li>
+		<li><!--Bowser:--><img src = "Images/Characters/bowser.png" id = "bowser" class = "fPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "fList">cost: <span id = "bowserCost" class = "fList bowserCost"/></li>
+				<li class = "fList">C/s: <span id = "bowserProduce" class = "fList"/></li>
+				<li class = "fList">Owned: <span id = "bowserOwned" class = "fList"/></li>
+			</ul>
+		</li>
+	</ul>
+	<ul id = "cList">
+		<li><!--Zelda:--><img src = "Images/Characters/zelda.png" id = "zelda" class = "fPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "fList">cost: <span id = "zeldaCost" class = "fList zeldaCost"/></li>
+				<li class = "fList">C/s: <span id = "zeldaProduce" class = "fList"/></li>
+				<li class = "fList">Owned: <span id = "zeldaOwned" class = "fList"/></li>
+			</ul>
+		</li>
+		<li><!--Ness:--><img src = "Images/Characters/ness.png" id = "ness" class = "fPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "fList">cost: <span id = "nessCost" class = "fList nessCost"/></li>
+				<li class = "fList">C/s: <span id = "nessProduce" class = "fList"/></li>
+				<li class = "fList">Owned: <span id = "nessOwned" class = "fList"/></li>
+			</ul>
+		</li>
+	</ul>
+	</div>
+	</div>
+	<div id = "bLayer">
+	<div id = "bLock">
+	<h3 id = "bTitle">B Tiers</h3>
+	<button id = "b" onclick = "unlock = this.id, Unlock()">Unlock<br><span id = "bUnlockCost">(1001 coins)</span></button>
+	<ul id = "cList">
+		<li><!--Pichu:--><img src = "Images/Characters/pichu.png" id = "pichu" class = "bPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "bList">cost: <span id = "pichuCost" class = "bList pichuCost"/></li>
+				<li class = "bList">C/s: <span id = "pichuProduce" class = "bList"/></li>
+				<li class = "bList">Owned: <span id = "pichuOwned" class = "bList"/></li>
+			</ul>
+		</li>
+		<li><!--Mewtwo:--><img src = "Images/Characters/mewtwo.png" id = "mewtwo" class = "bPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "bList">cost: <span id = "mewtwoCost" class = "bList mewtwoCost"/></li>
+				<li class = "bList">C/s: <span id = "mewtwoProduce" class = "bList"/></li>
+				<li class = "bList">Owned: <span id = "mewtwoOwned" class = "bList"/></li>
+			</ul>
+		</li>
+		<li><!--Roy:--><img src = "Images/Characters/roy.png" id = "roy" class = "bPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "bList">cost: <span id = "royCost" class = "bList royCost"/></li>
+				<li class = "bList">C/s: <span id = "royProduce" class = "bList"/></li>
+				<li class = "bList">Owned: <span id = "royOwned" class = "bList"/></li>
+			</ul>
+		</li>
+		<li><!--Game & Watch:--><img src = "Images/Characters/gaw.png" id = "gaw" class = "bPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "bList">cost: <span id = "gawCost" class = "bList gawCost"/></li>
+				<li class = "bList">C/s: <span id = "gawProduce" class = "bList"/></li>
+				<li class = "bList">Owned: <span id = "gawOwned" class = "bList"/></li>
+			</ul>
+		</li>
+	</ul>
+	<ul id = "cList">
+		<li><!--Link:--><img src = "Images/Characters/link.png" id = "oldLink" class = "bPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "bList">cost: <span id = "oldLinkCost" class = "bList oldLinkCost"/></li>
+				<li class = "bList">C/s: <span id = "oldLinkProduce" class = "bList"/></li>
+				<li class = "bList">Owned: <span id = "oldLinkOwned" class = "bList"/></li>
+			</ul>
+		</li>
+		<li><!--Young Link:--><img src = "Images/Characters/ylink.png" id = "youngLink" class = "bPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "bList">cost: <span id = "youngLinkCost" class = "bList youngLinkCost"/></li>
+				<li class = "bList">C/s: <span id = "youngLinkProduce" class = "bList"/></li>
+				<li class = "bList">Owned: <span id = "youngLinkOwned" class = "bList"/></li>
+			</ul>
+		</li>
+		<li><!--Donkey Kong:--><img src = "Images/Characters/dkong.png" id = "dk" class = "bPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "bList">cost: <span id = "dkCost" class = "bList dkCost"/></li>
+				<li class = "bList">C/s: <span id = "dkProduce" class = "bList"/></li>
+				<li class = "bList">Owned: <span id = "dkOwned" class = "bList"/></li>
+			</ul>
+		</li>
+	</ul>
+	</div>
+	</div>
+	<div id = "aLayer">
+	<div id = "aLock">
+	<h3 id = "aTitle">A Tiers</h3>
+	<button id = "a" onclick = "unlock = this.id, Unlock()">Unlock<br><span id = "aUnlockCost">(10001 coins)</span></button>
+	<ul id = "cList">
+		<li><!--Mario:--><img src = "Images/Characters/mario.png" id = "mario" class = "aPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "aList">cost: <span id = "marioCost" class = "aList marioCost"/></li>
+				<li class = "aList">C/s: <span id = "marioProduce" class = "aList"/></li>
+				<li class = "aList">Owned: <span id = "marioOwned" class = "aList"/></li>
+			</ul>
+		</li>
+		<li><!--Yoshi:--><img src = "Images/Characters/yoshi.png" id = "yoshi" class = "aPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "aList">cost: <span id = "yoshiCost" class = "aList yoshiCost"/></li>
+				<li class = "aList">C/s: <span id = "yoshiProduce" class = "aList"/></li>
+				<li class = "aList">Owned: <span id = "yoshiOwned" class = "aList"/></li>
+			</ul>
+		</li>
+		<li><!--Ganon:--><img src = "Images/Characters/ganon.png" id = "ganon" class = "aPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "aList">cost: <span id = "ganonCost" class = "aList ganonCost"/></li>
+				<li class = "aList">C/s: <span id = "ganonProduce" class = "aList"/></li>
+				<li class = "aList">Owned: <span id = "ganonOwned" class = "aList"/></li>
+			</ul>
+		</li>	
+		<li><!--Luigi:--><img src = "Images/Characters/luigi.png" id = "luigi" class = "aPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "aList">cost: <span id = "luigiCost" class = "aList luigiCost"/></li>
+				<li class = "aList">C/s: <span id = "luigiProduce" class = "aList"/></li>
+				<li class = "aList">Owned: <span id = "luigiOwned" class = "aList"/></li>
+			</ul>
+		</li>
+	</ul>
+	<ul id = "cList">
+		<li><!--Samus:--><img src = "Images/Characters/samus.png" id = "samus" class = "aPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "aList">cost: <span id = "samusCost" class = "aList samusCost"/></li>
+				<li class = "aList">C/s: <span id = "samusProduce" class = "aList"/></li>
+				<li class = "aList">Owned: <span id = "samusOwned" class = "aList"/></li>
+			</ul>
+		</li>
+		<li><!--Pikachu:--><img src = "Images/Characters/pikachu.png" id = "pikachu" class = "aPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "aList">cost: <span id = "pikachuCost" class = "aList pikachuCost"/></li>
+				<li class = "aList">C/s: <span id = "pikachuProduce" class = "aList"/></li>
+				<li class = "aList">Owned: <span id = "pikachuOwned" class = "aList"/></li>
+			</ul>
+		</li>
+		<li><!--Dr. Mario--><img src = "Images/Characters/dmario.png" id = "drMario" class = "aPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "aList">cost: <span id = "drMarioCost" class = "aList drMarioCost"/></li>
+				<li class = "aList">C/s: <span id = "drMarioProduce" class = "aList"/></li>
+				<li class = "aList">Owned: <span id = "drMarioOwned" class = "aList"/></li>
+			</ul>
+		</li>
+	</ul>
+	</div>
+	</div>
+	<div id = "sLayer">
+	<div id = "sLock">
+	<h3 id = "sTitle">S Tiers</h3>
+	<button id = "s" onclick = "unlock = this.id, Unlock()">Unlock<br><span id = "sUnlockCost">(100001 coins)</span></button>
+	<ul id = "cList">
+		<li><!--Captain Falcon:--><img src = "Images/Characters/cfalcon.png" id = "falcon" class = "sPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "sList">cost: <span id = "falconCost" class = "sList falconCost"/></li>
+				<li class = "sList">C/s: <span id = "falconProduce" class = "sList"/></li>
+				<li class = "sList">Owned: <span id = "falconOwned" class = "sList"/></li>
+			</ul>
+		</li>
+		<li><!--Ice Climbers:--><img src ="Images/Characters/climbers.png" id = "climbers" class = "sPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "sList">cost: <span id = "climbersCost" class = "sList climbersCost"/></li>
+				<li class = "sList">C/s: <span id = "climbersProduce" class = "sList"/></li>
+				<li class = "sList">Owned: <span id = "climbersOwned" class = "sList"/></li>
+			</ul>
+		</li>
+		<li><!--Jigglypuff:--><img src = "Images/Characters/puff.png" id = "puff" class = "sPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "sList">cost: <span id = "puffCost" class = "sList puffCost"/></li>
+				<li class = "sList">C/s: <span id = "puffProduce" class = "sList"/></li>
+				<li class = "sList">Owned: <span id = "puffOwned" class = "sList"/></li>
+			</ul>
+		</li>
+		<li><!--Peach:--><img src = "Images/Characters/peach.png" id = "peach" class = "sPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "sList">cost: <span id = "peachCost" class = "sList peachCost"/></li>
+				<li class = "sList">C/s: <span id = "peachProduce" class = "sList"/></li>
+				<li class = "sList">Owned: <span id = "peachOwned" class = "sList"/></li>
+			</ul>
+		</li>
+	</ul>
+	<ul id = "cList">
+		<li><!--Sheik:--><img src = "Images/Characters/sheik.png" id = "sheik" class = "sPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "sList">cost: <span id = "sheikCost" class = "sList sheikCost"/></li>
+				<li class = "sList">C/s: <span id = "sheikProduce" class = "sList"/></li>
+				<li class = "sList">Owned: <span id = "sheikOwned" class = "sList"/></li>
+			</ul>
+		</li>
+		<li><!--Marth:--><img src = "Images/Characters/marth.png" id = "marth" class = "sPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "sList">cost: <span id = "marthCost" class = "sList marthCost"/></li>
+				<li class = "sList">C/s: <span id = "marthProduce" class = "sList"/></li>
+				<li class = "sList">Owned: <span id = "marthOwned" class = "sList"/></li>
+			</ul>
+		</li>
+		<li><!--Falco:--><img src = "Images/Characters/falco.png" id = "falco" class = "sPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "sList">cost: <span id = "falcoCost" class = "sList falcoCost"/></li>
+				<li class = "sList">C/s: <span id = "falcoProduce" class = "sList"/></li>
+				<li class = "sList">Owned: <span id = "falcoOwned" class = "sList"/></li>
+			</ul>
+		</li>
+		<li><!--Fox:--><img src = "Images/Characters/fox.png" id = "fox" class = "sPic" onclick = "choice = this.id, add()">
+			<ul id = "attributeList">
+				<li class = "sList">cost: <span id = "foxCost" class = "sList foxCost"/></li>
+				<li class = "sList">C/s: <span id = "foxProduce" class = "sList"/></li>
+				<li class = "sList">Owned: <span id = "foxOwned" class = "sList"/></li>
+			</ul>
+		</li>
+	</ul>
+	</div>
+	</div>
+</body>
+</html>
