@@ -342,3 +342,23 @@ p#soon{
 	margin-bottom: 15px;
 	font-style: italic;
 }
+
+a:link{
+	color: blue;
+	text-decoration: none;
+}
+
+a:visited{
+	color: blue;
+	text-decoration: none;
+}
+
+a:hover{
+	text-decoration: underline;
+	color: red;
+}
+
+a:active{
+	text-decoration: underline;
+	color: purple;
+}
